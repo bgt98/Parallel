@@ -33,48 +33,52 @@ pthread_mutex_t mutex;
 pthread_cond_t cond;
 //funcao para sincronizacao por barreira
 void barreira(int nthreads) {
-static int n = 0; //numero de threads que ja chegaram na barreira
-pthread_mutex_lock(&mutex);
-n++;
-if(n < nthreads) { //barreira incompleta, thread deve se bloquear
-pthread_cond_wait(&cond, &mutex);
-} else {
-n = 0;
-pthread_cond_broadcast(&cond);
-}
-pthread_mutex_unlock(&mutex);
+  static int n = 0; //numero de threads que ja chegaram na barreira
+  pthread_mutex_lock(&mutex);
+  n++;
+  if(n < nthreads) { //barreira incompleta, thread deve se bloquear
+    pthread_cond_wait(&cond, &mutex);
+  } else {
+    n = 0;
+    pthread_cond_broadcast(&cond);
+  }
+  pthread_mutex_unlock(&mutex);
 }
 //funcao executada pelas threads
 void *tarefa (void *tid) {
-int id = * (int *) tid, i;
-free(tid);
-int inicio, fim, bloco;
-//primeira rodada: cada thread calcula a soma de prefixos de uma parte do vetor
-//calcula as posicoes de inicio e fim que a thread ira processar
-bloco = nthreads/tam; //tamanho do bloco que cada thead ira processar
-inicio = id * bloco;
-fim = inicio + bloco;
-if (id == (nthreads-1)) fim = tam; //deixa para a ultima thread o restante do vetor
-vetb[inicio] = veta[inicio]; //o primeiro elemento eh repetido
-//calcula a soma de prefixos parcial
-for(i=inicio+1; i<fim; i++) {
-vetb[i] = vetb[i-1] + veta[i];
-}
-vetaux[id] = vetb[fim-1]; //armazena no vetor auxiliar o ultimo valor calculado
-//(devera ser somado aos valores seguintes do vetor de saida)
-//sincronizacao por barreira para aguardar todas as threads terminarem a primeira rodada
-barreira(nthreads);
-//segunda rodada: soma em cada parte a contribuicao das partes anteriores
-//apenas as threads com id>0 precisam continuar
-if(id > 0) {
-int soma_anterior = 0;
-for(i=0; i<id; i++) {
-soma_anterior += vetaux[i];
-}
-//atualiza os valores da sua parte do vetor de saida
-for(i=inicio; i<fim; i++) {
-vetb[i] += soma_anterior;
-}
-}
-pthread_exit(NULL);
+  int id = * (int *) tid, i;
+  free(tid);
+  int inicio, fim, bloco;
+  //primeira rodada: cada thread calcula a soma de prefixos de uma parte do vetor
+  
+  //calcula as posicoes de inicio e fim que a thread ira processar
+  bloco = nthreads/tam; //tamanho do bloco que cada thead ira processar
+  inicio = id * bloco;
+  fim = inicio + bloco;
+  if (id == (nthreads-1)) fim = tam; //deixa para a ultima thread o restante do vetor
+  
+  vetb[inicio] = veta[inicio]; //o primeiro elemento eh repetido
+  //calcula a soma de prefixos parcial
+  for(i=inicio+1; i<fim; i++) {
+    vetb[i] = vetb[i-1] + veta[i];
+  }
+  vetaux[id] = vetb[fim-1]; //armazena no vetor auxiliar o ultimo valor calculado
+    //(devera ser somado aos valores seguintes do vetor de saida)
+  //sincronizacao por barreira para aguardar todas as threads terminarem a primeira rodada
+  barreira(nthreads);
+  
+  //segunda rodada: soma em cada parte a contribuicao das partes anteriores
+  
+  //apenas as threads com id>0 precisam continuar
+  if(id > 0) {
+    int soma_anterior = 0;
+    for(i=0; i<id; i++) {
+      soma_anterior += vetaux[i];
+    }
+    //atualiza os valores da sua parte do vetor de saida
+    for(i=inicio; i<fim; i++) {
+      vetb[i] += soma_anterior;
+    }
+  }
+  pthread_exit(NULL);
 }
