@@ -1,0 +1,9 @@
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with <open> and enter text in its buffer.
+
+* Registros de tempos de execução
+
+  |           | Matriz 1024 | Matriz 2048  |
+  | 1 thread  | 20,31688699 | 198,68490327 |
+  | 4 threads | 9,66110261  | 108,50442252 |
+  | Ganho     | 2,10295738  | 1,82664154   |
