@@ -15,13 +15,15 @@ Resp.:
 int x, y, z, k, a, b; //variiáveis globais
 sem_t em=1, s1=0, s2=0; //semáforos globais
 int cond=0; //vari ́avel global
-T1 e T2:
+
+//T1 e T2:
 //lˆe x ou y da entrada padrão
 sem_wait(&em);
 cond++;
 if(cond==2) sem_post(&s1);
 sem_post(&em);
-T3 e T4:
+
+//T3 e T4:
 sem_wait(&s1);
 cond--;
 sem_post(&s1);
@@ -31,3 +33,10 @@ sem_wait(&s1);
 cond++;
 if(cond==2) sem_post(&s2);
 else sem_post(&s1);
+
+//T5 e T6:
+sem_wait(&s2);
+cond--;
+if(cond==1 sem_post(&s2);
+//lˆe z e k
+//calcula a ou b
