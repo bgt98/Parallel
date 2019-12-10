@@ -7,20 +7,25 @@ espera() (faz os carros esperarem) e libera() (libera os carros que estao espera
 
 ́
 sem_t em, s; int cont=0; sem_init(&em,0,1); sem_init(&s,0,0);
+
 espera() { libera() {
 sem_wait(&em); cont++; sem_post(&em); sem_wait(&em);
 sem_wait(&s); cont--; if(cont>0) sem_post(&s);
 if(cont>0) sem_post(&s); else sem_post(&em);
 else sem_post(&em); } }
+
+
+
 Resp.:
+
 int n_sul=0, n_norte=0; sem_t e; //variaveis globais
 sem_init(&e,0,1);
 //Pseudo-codigo dos carros do norte
 sem_wait(&e);
 while(n_sul > 0) {
-sem_post(&e);
-espera();
-sem_wait(&e);
+  sem_post(&e);
+  espera();
+  sem_wait(&e);
 }
 n_norte++;
 
@@ -29,14 +34,14 @@ sem_post(&e);
 sem_wait(&e);
 n_norte--;
 if(n_norte == 0)
-libera();
+  libera();
 sem_post(&e);
 //Pseudo-codigo dos carros do sul
 sem_wait(&e);
 while(n_norte > 0) {
-sem_post(&e);
-espera();
-sem_wait(&e);
+  sem_post(&e);
+  espera();
+  sem_wait(&e);
 }
 n_sul++;
 sem_post(&e);
@@ -44,5 +49,5 @@ sem_post(&e);
 sem_wait(&e);
 n_sul--;
 if(n_sul == 0)
-libera();
+  libera();
 sem_post(&e);
