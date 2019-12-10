@@ -5,16 +5,16 @@ um item que nao existia no buffer. Identifique a causa do erro no c  ̃ odigo e 
 maneira de resolve-lo (sem acrescentar novos sem ˆ aforos).  ́ Comente seu codigo. 
 ́
 1:int n=0; sem_t s, d; //s inicializado com 1 e d inicializado com 0
-2:void *cons(void* a) {int item; void *prod(void *a) {int item;
-3: sem_wait(&d); while(1) {
-4: while(1) { produz_item(&item);
-5: sem_wait(&s); sem_wait(&s);
-6: retira_item(&item); insere_item(item);
-7: n--; n++;
-8: sem_post(&s); if(n==1) sem_post(&d);
-9: consome_item(item); sem_post(&s);
-10: if(n==0) sem_wait(&d); }
-11: } }
+2:void *cons(void* a) {int item;                  void *prod(void *a) {int item;
+3:  sem_wait(&d);                                   while(1) {
+4:  while(1) {                                        produz_item(&item);
+5:    sem_wait(&s);                                   sem_wait(&s);
+6:    retira_item(&item);                             insere_item(item);
+7:    n--;                                            n++;
+8:    sem_post(&s);                                   if(n==1) sem_post(&d);
+9:     consome_item(item);                            sem_post(&s);
+10:   if(n==0) sem_wait(&d);                         }
+11:   }                                            }
 12:}
 
 Resp.: Uma situac ̧ao que pode ocorrer  ̃ e a seguinte: O consumidor esvazia o  ́
