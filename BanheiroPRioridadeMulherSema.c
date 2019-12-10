@@ -11,30 +11,34 @@ sem_init(&emH, 0, 1); //exclusao mutua entre os homens
 sem_init(&prior, 0, 1); //prioridade para mulheres
 sem_init(&ban, 0, 1); //acesso ao banheiro restrito a apenas homens ou apenas mulheres
 void *Mulheres (void *threadid) {
-while(1) {
-sem_wait(&emM); m++;
-if(m==1) {
-sem_wait(&prior); //impede a entrada de novos homens no banheiro (prioridade mulheres)
-sem_wait(&ban); } //aguarda a liberacao do banheiro pelos homens
-sem_post(&emM);
-//SC: usa o banheiro
-sem_wait(&emM); m--;
-if(m==0) { sem_post(&prior); sem_post(&ban); }
-sem_post(&emM);
-} }
+  while(1) {
+    sem_wait(&emM); m++;
+    if(m==1) {
+      sem_wait(&prior); //impede a entrada de novos homens no banheiro (prioridade mulheres)
+      sem_wait(&ban); //aguarda a liberacao do banheiro pelos homens
+    } 
+    sem_post(&emM);
+    //SC: usa o banheiro
+    sem_wait(&emM); m--;
+    if(m==0) { sem_post(&prior); sem_post(&ban); }
+    sem_post(&emM);
+  } 
+  pthread_exit(NULL);
+}
+
 //funcao executada pelos homens
 void *Homens (void *threadid) {
-while(1) {
-sem_wait(&prior);//nao permite a entrada de novos homens se ha mulheres esperando
-h++;
-if(h==1) {
-sem_wait(&ban);//aguarda a liberacao do banheiro pelas mulheres
-}
-sem_post(&prior);
-//SC: usa o banheiro
-sem_wait(&emH); h--;
-if(h==0) sem_post(&ban);
-sem_post(&emH);
-}
-pthread_exit(NULL);
+  while(1) {
+    sem_wait(&prior);//nao permite a entrada de novos homens se ha mulheres esperando
+    h++;
+    if(h==1) {
+      sem_wait(&ban);//aguarda a liberacao do banheiro pelas mulheres
+    }
+    sem_post(&prior);
+    //SC: usa o banheiro
+    sem_wait(&emH); h--;
+    if(h==0) sem_post(&ban);
+    sem_post(&emH);
+  }
+  pthread_exit(NULL);
 }
