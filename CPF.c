@@ -1,4 +1,4 @@
-Voce foi contratado para desenvolver uma aplicac ̧ ˆ ao para a Justic ̧a  ̃
+/*Voce foi contratado para desenvolver uma aplicac ̧ ˆ ao para a Justic ̧a  ̃
 Federal que, dado o numero do CPF de uma pessoa, consulte todos os processos relaciona-  ́
 dos a essa pessoa em um banco de dados e gere um arquivo texto com esse levantamento.
 Como a busca no banco de dados e muito demorada, j  ́ a foi definido que a aplicac ̧  ́ ao ̃
@@ -34,7 +34,7 @@ lema, nao possui erros de concorr  ̃ encia, como possibilidade de condic ̧ ˆ 
 desejaveis, e n  ́ ao pode causar deadlock ou livelock) e  ̃ a` eficiencia ˆ (usa da melhor forma
 poss ́ıvel a capacidade de processamento da maquina). Apresente argumentos objetivos  ́
 que justifiquem a sua avaliac ̧ao.  ̃
-Resp.: (a)
+Resp.: (a)*/
 
 
 /* Variaveis globais */
@@ -47,91 +47,91 @@ int terminar=0; //variavel para registrar se a aplicacao deve terminar (0:nao, 1
 //insere um novo cliente (CPF) no buffer para ser atendido por uma thread
 //funcao executada pela thread main
 int insere(long int cliente) {
-pthread_mutex_lock(&em);
-if(cont==NTHREADS) { //se nao ha espaco no buffer, recusa a solicitacao
-pthread_mutex_unlock(&em);
-return 0;
-}
-//insere o novo cliente e atualiza as variaveis de estado do buffer
-cpf[in]=cliente;
-in=(in+1)%NTHREADS;
-cont++;
-pthread_mutex_unlock(&em);
-return 1;
+  pthread_mutex_lock(&em);
+  if(cont==NTHREADS) { //se nao ha espaco no buffer, recusa a solicitacao
+    pthread_mutex_unlock(&em);
+    return 0;
+  }
+  //insere o novo cliente e atualiza as variaveis de estado do buffer
+  cpf[in]=cliente;
+  in=(in+1)%NTHREADS;
+  cont++;
+  pthread_mutex_unlock(&em);
+  return 1;
 }
 //retira um cliente do buffer para atende-lo
 //funcao executada pelas threads auxiliares
 //(elas soh executam essa funcao se ja houver uma solicitacao armazenada)
 long int retira() {
-long int cliente;
-cliente=cpf[out];
-cpf[out]=0; //slot vazio
-out=(out+1)%NTHREADS;
-cont--;
-return cliente;
+  long int cliente;
+  cliente=cpf[out];
+  cpf[out]=0; //slot vazio
+  out=(out+1)%NTHREADS;
+  cont--;
+  return cliente;
 }
 //funcao principal das threads auxiliares
 void *Trabalhador (void *t) {
 
-int my_id = *(int*)t;
-long int local_cpf;
-while(1) { //permanece ativa ate que o sinal de terminar seja lanc ̧ado
-pthread_mutex_lock(&em);
-while((cont==0) && (!terminar)) {
-pthread_cond_wait(&cond, &em);
-}
-if(cont>0) { //ha solicitacao para tratar, pega uma delas e processa
-local_cpf=retira();
-pthread_mutex_unlock(&em);
-fazInteracao(local_cpf); //interacao com o cliente remoto, fora da secao critica
-} else { //terminar==1, a thread deve encerrar
-pthread_mutex_unlock(&em);
-break;
-}
-}
-pthread_exit(NULL);
+  int my_id = *(int*)t;
+  long int local_cpf;
+  while(1) { //permanece ativa ate que o sinal de terminar seja lanc ̧ado
+    pthread_mutex_lock(&em);
+    while((cont==0) && (!terminar)) {
+      pthread_cond_wait(&cond, &em);
+    }
+    if(cont>0) { //ha solicitacao para tratar, pega uma delas e processa
+      local_cpf=retira();
+      pthread_mutex_unlock(&em);
+      fazInteracao(local_cpf); //interacao com o cliente remoto, fora da secao critica
+    } else { //terminar==1, a thread deve encerrar
+      pthread_mutex_unlock(&em);
+      break;
+    }
+  }
+  pthread_exit(NULL);
 }
 //funcao principal
 int main(int argc, char *argv[]) {
-int i,res;
-long int req;
-pthread_t threads[NTHREADS];
-int id[NTHREADS];
-//inicializa o lock e a variavel de condicao
-pthread_mutex_init(&em, NULL);
-pthread_cond_init(&cond, NULL);
-//cria as threads auxiliares
-for(i=0;i<NTHREADS;i++) {
-id[i]=i;
-pthread_create(&threads[i], NULL, Trabalhador, (void *) &id[i]);
-}
-//espera os CPFs ou aviso de terminar (valor negativo)
-do {
-scanf("%ld", &req);
-if(req<0) { //terminar a aplicacao
-pthread_mutex_lock(&em);
-terminar=1; //altera a variavel de estado
-//desbloqueia as threads auxiliares que estiverem bloqueadas
-pthread_cond_broadcast(&cond);
-pthread_mutex_unlock(&em);
-break; //sai do loop
-}
-res=insere(req); //tenta armazenar o CPF do cliente
-if(res) { //se conseguir, desbloqueia uma thread auxiliar
-pthread_cond_signal(&cond);
-} else //se o limite de CPFs esperando ja foi atingido, ignora essa solicitacao
-printf("Thread main: cpf=%d nao sera atendido!\n", req);
-} while(1);
-//espera todas as threads completarem
-for (i = 0; i < NTHREADS; i++) {
-pthread_join(threads[i], NULL);
-}
-pthread_exit (NULL);
+  int i,res;
+  long int req;
+  pthread_t threads[NTHREADS];
+  int id[NTHREADS];
+  //inicializa o lock e a variavel de condicao
+  pthread_mutex_init(&em, NULL);
+  pthread_cond_init(&cond, NULL);
+  //cria as threads auxiliares
+  for(i=0;i<NTHREADS;i++) {
+    id[i]=i;
+    pthread_create(&threads[i], NULL, Trabalhador, (void *) &id[i]);
+  }
+  //espera os CPFs ou aviso de terminar (valor negativo)
+  do {
+    scanf("%ld", &req);
+  if(req<0) { //terminar a aplicacao
+    pthread_mutex_lock(&em);
+    terminar=1; //altera a variavel de estado
+    //desbloqueia as threads auxiliares que estiverem bloqueadas
+    pthread_cond_broadcast(&cond);
+    pthread_mutex_unlock(&em);
+    break; //sai do loop
+  }
+  res=insere(req); //tenta armazenar o CPF do cliente
+  if(res) { //se conseguir, desbloqueia uma thread auxiliar
+    pthread_cond_signal(&cond);
+  } else //se o limite de CPFs esperando ja foi atingido, ignora essa solicitacao
+    printf("Thread main: cpf=%d nao sera atendido!\n", req);
+  } while(1);
+  //espera todas as threads completarem
+  for (i = 0; i < NTHREADS; i++) {
+    pthread_join(threads[i], NULL);
+  }
+  pthread_exit (NULL);
 }
 
 
 
-Resp.: (b) Quanto a corretude: Ap ` os disparar todas as threads auxiliares, a  ́
+/*Resp.: (b) Quanto a corretude: Ap ` os disparar todas as threads auxiliares, a  ́
 thread main fica esperando a entrada do usuario. Se as threads auxiliares comec ̧arem  ́
 antes de existir requisic ̧oes do usu  ̃ ario elas ficar  ́ ao bloqueadas na fila da vari  ̃ avel de  ́
 condic ̧ao. A cada requisic ̧  ̃ ao recebida pela thread principal, uma thread auxiliar  ̃ e des-  ́
@@ -147,5 +147,5 @@ sec ̧ao cr  ̃  ́ıtica, permitindo que as threads possam executa-la em parale
 espera por uma requisic ̧ao, trata essa requisic ̧  ̃ ao e volta a esperar por nova requisic ̧  ̃ ao,  ̃
 garantindo balanceamento de carga entre as threads auxiliares. Quando nao h  ̃ a requisic ̧  ́ oes  ̃
 para atender, as threads auxiliares se bloqueiam, liberando a CPU para as outras threads.
-A thread principal aguarda a entrada do usuario sem impedir que as threads auxiliares  ́
-continuem trabalhando.
+A thread principal aguarda a entrada do usuario sem impedir que as threads auxiliares
+continuem trabalhando.*/
